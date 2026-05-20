@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AI Search Chat Fixer
 // @namespace    http://tampermonkey.net
-// @version      2.0.4
-// @description  Safely maps Enter and Alt+Enter to Newline using direct DOM injection.
+// @version      2.0.5
+// @description  Safely maps Enter and Alt+Enter to Newline using direct DOM injection with AI context validation.
 // @author       You
 // @match        https://www.google.com/search*
 // @allFrames    true
@@ -14,6 +14,10 @@
     'use strict';
 
     window.addEventListener('keydown', function(event) {
+        // Проверяем, что мы находимся именно в ИИ-режиме диалога Google
+        const isAIMode = window.location.href.includes('udm=50');
+        if (!isAIMode) return;
+
         const target = event.target;
         
         const isTextBox = target.tagName === 'TEXTAREA' || 
