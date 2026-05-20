@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AI Search Chat Fixer
 // @namespace    http://tampermonkey.net
-// @version      2.0.3
-// @description  Safely maps Enter to Newline using direct DOM injection and leaves Ctrl+Enter untouched.
+// @version      2.0.4
+// @description  Safely maps Enter and Alt+Enter to Newline using direct DOM injection.
 // @author       You
 // @match        https://www.google.com/search*
 // @allFrames    true
@@ -15,13 +15,17 @@
 
     window.addEventListener('keydown', function(event) {
         const target = event.target;
-
-        const isTextBox = target.tagName === 'TEXTAREA' ||
+        
+        const isTextBox = target.tagName === 'TEXTAREA' || 
                           target.getAttribute('contenteditable') === 'true';
-
+        
         if (!isTextBox) return;
 
-        if (event.key === 'Enter' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+        // Выделяем условия для чистого Enter и Alt+Enter
+        const isPlainEnter = event.key === 'Enter' && !event.ctrlKey && !event.shiftKey && !event.altKey;
+        const isAltEnter = event.key === 'Enter' && event.altKey && !event.ctrlKey && !event.shiftKey;
+
+        if (isPlainEnter || isAltEnter) {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
@@ -35,8 +39,10 @@
             } else {
                 document.execCommand('insertLineBreak');
             }
-
-            target.dispatchEvent(new Event('input', { bubbles: true }));
+            
+            target.dispatchEvent(new Event('input', {
+                bubbles: true
+            }));
         }
     }, true);
 })();
